@@ -33,29 +33,38 @@ function Device(name) {
 }
 
 Device.prototype.connect = function(callback) {
-    serial.open(this.name, this.onopen.bind(this));
+    //serial.open(this.name, this.onopen.bind(this));
+    serial.connect(this.name, {}, this.onopen.bind(this));
     this.callbacks.connect = callback;
 };
 
 Device.prototype.onopen = function(info) {
     var device = this;
+	console.log(info);
+	if(info !== undefined)
+	{
+		device.conn = info.connectionId;
 
-    device.conn = info.connectionId;
-
-    device.write(cmd.FMWARE_INFO, function() {});
-    device.readall(function(info) {
-        if(info.toLowerCase().indexOf(MKB_FLAG.toLowerCase()) > -1 && device.callbacks.connect)
-            device.callbacks.connect(device, !0);
-        else
-            device.callbacks.connect(device, 0);
-    });
+	    device.write(cmd.FMWARE_INFO, function() {});
+	    device.readall(function(info) {
+	        if(info.toLowerCase().indexOf(MKB_FLAG.toLowerCase()) > -1 && device.callbacks.connect)
+	            device.callbacks.connect(device, !0);
+	        else
+	            device.callbacks.connect(device, 0);
+	    });
+	}
+	else
+	{
+		this.callbacks.connect(device, false);
+	}
 };
 
 Device.prototype.read = function(callback) {
     if(this.conn < 0) 
         throw 'Device not connected';
 
-    serial.read(this.conn, 255, this.onread.bind(this));
+    //serial.read(this.conn, 255, this.onread.bind(this));
+    serial.onReceive.addListener(this.onread.bind(this));
     this.callbacks.read = callback;
 };
 

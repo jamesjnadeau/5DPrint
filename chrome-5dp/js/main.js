@@ -16,15 +16,19 @@ var fdp = {
             devices = {};
             
         var conncb = function(device, valid) {
-            if(valid) {
+            if(valid) 
+            {
                 notify({ title: "Device Attached", message: device.name + " attached" });
                 devices[device.name] = device;
                 launcher.devIds.push(device.conn);
                 ui.attachDevice(device);
                 device.getFullStats();
-            } else {
-                serial.flush(device.conn, function(){});
-                serial.close(device.conn, function(){});
+            } 
+            else 
+            {
+				//not sure this is needed anymore after api update....
+                //serial.disconnect(device.conn, function(){});
+                //serial.close(device.conn, function(){});
             }      
         };
 
@@ -32,10 +36,16 @@ var fdp = {
         //  and attempts to open and set the device if it is
         //  indeed a 5dprint compatable device (i.e. MakiBox A6)
         connTimer = window.setInterval(function() { 
-            serial.getPorts(function(ports) {
+            serial.getDevices(function(ports) {
                 for(var i=0; i < ports.length; i++) {
-                    if(ports[i].indexOf(util.serialPrefix) > -1 && devices[ports[i]] === undefined)
-                        new Device(ports[i]).connect(conncb);
+                   // if(ports[i].indexOf(util.serialPrefix) > -1 && devices[ports[i]] === undefined)
+                    /*if(ports[i].util !== undefined
+						&& devices[ports[i]] === undefined )
+                    {
+                        
+                    }*/
+                    console.log(ports[i]);
+                    new Device(ports[i].path).connect(conncb);
                 }
             });
         }, 1200);
